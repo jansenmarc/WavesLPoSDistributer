@@ -1,15 +1,15 @@
 var request = require('sync-request');
 var fs = require('fs');
 
-/*
-    Put your settings here:
-        - address: the address of your node that you want to distribute from
-        - startBlockHeight: the block from which you want to start distribution for
-        - endBlock: the block until you want to distribute the earnings
-        - distributableMRTPerBlock: amount of MRT distributed per forged block
-        - filename: file to which the payments for the mass payment tool are written
-        - node: address of your node in the form http://<ip>:<port
-        - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
+/**
+  * Put your settings here:
+  *     - address: the address of your node that you want to distribute from
+  *     - startBlockHeight: the block from which you want to start distribution for
+  *     - endBlock: the block until you want to distribute the earnings
+  *     - distributableMRTPerBlock: amount of MRT distributed per forged block
+  *     - filename: file to which the payments for the mass payment tool are written
+  *     - node: address of your node in the form http://<ip>:<port
+  *     - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
  */
 var config = {
     address: '',
@@ -27,6 +27,12 @@ var myLeases = {};
 var myCanceledLeases = {};
 var myForgedBlocks = [];
 
+/**
+  * This method starts the overall process by first downloading the blocks,
+  * preparing the necessary datastructures and finally preparing the payments
+  * and serializing them into a file that could be used as input for the
+  * masspayment tool.
+ */
 var start = function() {
     console.log('getting blocks...');
     var blocks = getAllBlocks();
@@ -44,6 +50,12 @@ var start = function() {
     pay();
 };
 
+/**
+ * This method organizes the datastructures that are later on necessary
+ * for the block-exact analysis of the leases.
+ *
+ *   @param blocks all blocks that should be considered
+ */
 var prepareDataStructure = function(blocks) {
     blocks.forEach(function(block) {
         var wavesFees = 0;
@@ -53,13 +65,15 @@ var prepareDataStructure = function(blocks) {
         }
 
         block.transactions.forEach(function(transaction) {
+            // type 8 are leasing tx
             if (transaction.type === 8 && transaction.recipient === config.address) {
                 transaction.block = block.height;
                 myLeases[transaction.id] = transaction;
-            } else if (transaction.type === 9 && myLeases[transaction.leaseId]) {
+            } else if (transaction.type === 9 && myLeases[transaction.leaseId]) { // checking for lease cancel tx
                 transaction.block = block.height;
                 myCanceledLeases[transaction.id] = transaction;
             }
+            // considering Waves fees
             if (!transaction.feeAsset || transaction.feeAsset === '' || transaction.feeAsset === null) {
                 wavesFees += transaction.fee;
             }
@@ -68,7 +82,13 @@ var prepareDataStructure = function(blocks) {
     });
 };
 
+/**
+ * Method that returns all relevant blocks.
+ *
+ * @returns {Array} all relevant blocks
+ */
 var getAllBlocks = function() {
+    // leases have been resetted in block 462000, therefore, this is the first relevant block to be considered
     var firstBlockWithLeases = 462000;
     var currentStartBlock = firstBlockWithLeases;
     var blocks = [];
@@ -106,6 +126,14 @@ var getAllBlocks = function() {
     return blocks;
 };
 
+/**
+ * This method distributes either Waves fees and MRT to the active leasers for
+ * the given block.
+ *
+ * @param activeLeases active leases for the block in question
+ * @param amountTotalLeased total amount of leased waves in this particular block
+ * @param block the block to consider
+ */
 var distribute = function(activeLeases, amountTotalLeased, block) {
     var fee = block.wavesFees;
 
@@ -124,6 +152,10 @@ var distribute = function(activeLeases, amountTotalLeased, block) {
     }
 };
 
+/**
+ * Method that creates the concrete payment tx and writes it to the file
+ * configured in the config section.
+ */
 var pay = function() {
     var transactions = [];
     for (var address in payments) {
@@ -159,6 +191,13 @@ var pay = function() {
     });
 };
 
+/**
+ * This method returns (block-exact) the active leases and the total amount
+ * of leased Waves for a given block.
+ *
+ * @param block the block to consider
+ * @returns {{totalLeased: number, activeLeases: {}}} total amount of leased waves and active leases for the given block
+ */
 var getActiveLeasesAtBlock = function(block) {
     var activeLeases = [];
     var totalLeased = 0;
