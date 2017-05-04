@@ -11,13 +11,22 @@ var fs = require('fs');
   *     - node: address of your node in the form http://<ip>:<port
   *     - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
  */
-var config = {
+/*var config = {
     address: '',
     startBlockHeight: 462000,
     endBlock: 465000,
     distributableMrtPerBlock: 20,
     filename: 'test.json',
     node: 'http://<ip>:6869',
+    percentageOfFeesToDistribute: 100
+}*/
+var config = {
+    address: '3PEFQiFMLm1gTVjPdfCErG8mTHRcH2ATaWa',
+    startBlockHeight: 480000,
+    endBlock: 480500,
+    distributableMrtPerBlock: 40,
+    filename: 'test2.txt',
+    node: 'http://173.212.227.122:6869',
     percentageOfFeesToDistribute: 100
 }
 
@@ -138,17 +147,19 @@ var distribute = function(activeLeases, amountTotalLeased, block) {
     var fee = block.wavesFees;
 
     for (var address in activeLeases) {
-        var amount = fee * (activeLeases[address] / amountTotalLeased);
+        var share = (activeLeases[address] / amountTotalLeased)
+        var amount = fee * share;
+        var amountMRT = share * config.distributableMrtPerBlock;
 
         if (payments[address]) {
             payments[address] += amount * (config.percentageOfFeesToDistribute / 100);
-            mrt[address] += (activeLeases[address] / amountTotalLeased) * config.distributableMrtPerBlock;
+            mrt[address] += amountMRT;
         } else {
             payments[address] = amount * (config.percentageOfFeesToDistribute / 100);
-            mrt[address] = (activeLeases[address] / amountTotalLeased) * config.distributableMrtPerBlock;
+            mrt[address] = amountMRT;
         }
 
-        console.log(address + ' will receive ' + amount + ' of(' + fee + ') for block: ' + block.height);
+        console.log(address + ' will receive ' + amount + ' of(' + fee + ') and ' + amountMRT + ' MRT for block: ' + block.height + ' share: ' + share);
     }
 };
 
@@ -207,9 +218,7 @@ var getActiveLeasesAtBlock = function(block) {
         var currentLease = myLeases[leaseId];
 
         if (!myCanceledLeases[leaseId] || myCanceledLeases[leaseId].block > block.height) {
-
             activeLeases.push(currentLease);
-            totalLeased = currentLease.amount;
         }
     }
     activeLeases.forEach(function (lease) {
@@ -219,9 +228,10 @@ var getActiveLeasesAtBlock = function(block) {
             } else {
                 activeLeasesPerAddress[lease.sender] += lease.amount;
             }
+
+            totalLeased += lease.amount;
         }
     });
-    console.log(activeLeasesPerAddress);
 
     return { totalLeased: totalLeased, activeLeases: activeLeasesPerAddress };
 };
