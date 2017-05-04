@@ -1,13 +1,24 @@
 var request = require('sync-request');
 var fs = require('fs');
 
+/*
+    Put your settings here:
+        - address: the address of your node that you want to distribute from
+        - startBlockHeight: the block from which you want to start distribution for
+        - endBlock: the block until you want to distribute the earnings
+        - distributableMRTPerBlock: amount of MRT distributed per forged block
+        - filename: file to which the payments for the mass payment tool are written
+        - node: address of your node in the form http://<ip>:<port
+        - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
+ */
 var config = {
     address: '',
     startBlockHeight: 462000,
     endBlock: 465000,
     distributableMrtPerBlock: 20,
     filename: 'test.json',
-    node: 'http://<ip>:6869'
+    node: 'http://<ip>:6869',
+    percentageOfFeesToDistribute: 100
 }
 
 var payments = [];
@@ -102,10 +113,10 @@ var distribute = function(activeLeases, amountTotalLeased, block) {
         var amount = fee * (activeLeases[address] / amountTotalLeased);
 
         if (payments[address]) {
-            payments[address] += amount;
+            payments[address] += amount * (config.percentageOfFeesToDistribute / 100);
             mrt[address] += (activeLeases[address] / amountTotalLeased) * config.distributableMrtPerBlock;
         } else {
-            payments[address] = amount;
+            payments[address] = amount * (config.percentageOfFeesToDistribute / 100);
             mrt[address] = (activeLeases[address] / amountTotalLeased) * config.distributableMrtPerBlock;
         }
 
