@@ -11,7 +11,7 @@ var fs = require('fs');
   *     - node: address of your node in the form http://<ip>:<port
   *     - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
  */
-var config = {
+/*var config = {
     address: '',
     startBlockHeight: 462000,
     endBlock: 465000,
@@ -19,6 +19,15 @@ var config = {
     filename: 'test.json',
     node: 'http://<ip>:6869',
     percentageOfFeesToDistribute: 100
+};*/
+var config = {
+    address: '3PEFQiFMLm1gTVjPdfCErG8mTHRcH2ATaWa',
+    startBlockHeight: 480000,
+    endBlock: 481000,
+    distributableMrtPerBlock: 30,
+    filename: 'test.json',
+    node: 'http://173.212.227.122:6869',
+    percentageOfFeesToDistribute: 75
 };
 
 var payments = [];
@@ -71,7 +80,7 @@ var prepareDataStructure = function(blocks) {
                 myLeases[transaction.id] = transaction;
             } else if (transaction.type === 9 && myLeases[transaction.leaseId]) { // checking for lease cancel tx
                 transaction.block = block.height;
-                myCanceledLeases[transaction.id] = transaction;
+                myCanceledLeases[transaction.leaseId] = transaction;
             }
             // considering Waves fees
             if (!transaction.feeAsset || transaction.feeAsset === '' || transaction.feeAsset === null) {
