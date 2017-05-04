@@ -12,8 +12,6 @@ var config = {
 
 var payments = [];
 var mrt = [];
-var total = 0;
-var blockCount = 0;
 var myLeases = {};
 var myCanceledLeases = {};
 var myForgedBlocks = [];
