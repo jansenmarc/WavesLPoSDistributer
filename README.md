@@ -58,3 +58,5 @@ We decided to use two seperate tools since this allows for additional tests of t
 ```sh
 node apps.js && node massPayment.js
 ```
+## Why do i see negative amounts in the output?
+The tool automatically decucts two transaction fees (one for the Waves transfer, one for the MRT transfer). If a leaser earned less than those transaction fees, the amount that he receives would be negative. Those payments are of course not written to the payment file.
