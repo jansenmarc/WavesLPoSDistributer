@@ -98,14 +98,15 @@ var getAllBlocks = function() {
     while (currentStartBlock < config.endBlock) {
         var currentBlocks;
 
-        console.log('getting blocks from ' + currentStartBlock);
         if (currentStartBlock + 99 < config.endBlock) {
+            console.log('getting blocks from ' + currentStartBlock + ' to ' + (currentStartBlock + 99));
             currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + (currentStartBlock + 99), {
                 'headers': {
                     'Connection': 'keep-alive'
                 }
             }).getBody('utf8'));
         } else {
+            console.log('getting blocks from ' + currentStartBlock + ' to ' + config.endBlock);
             currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + config.endBlock, {
                 'headers': {
                     'Connection': 'keep-alive'
@@ -118,8 +119,8 @@ var getAllBlocks = function() {
             }
         });
 
-        if (currentStartBlock + 99 < config.endBlock) {
-            currentStartBlock += 99;
+        if (currentStartBlock + 100 < config.endBlock) {
+            currentStartBlock += 100;
         } else {
             currentStartBlock = config.endBlock;
         }
