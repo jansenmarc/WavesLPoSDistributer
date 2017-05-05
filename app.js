@@ -41,11 +41,13 @@ var start = function() {
 
     console.log('preparing payments...');
     myForgedBlocks.forEach(function(block) {
-        var blockLeaseData = getActiveLeasesAtBlock(block);
-        var activeLeasesForBlock = blockLeaseData.activeLeases;
-        var amountTotalLeased = blockLeaseData.totalLeased;
+        if (block.height >= config.startBlockHeight && block.height <= config.endBlock) {
+            var blockLeaseData = getActiveLeasesAtBlock(block);
+            var activeLeasesForBlock = blockLeaseData.activeLeases;
+            var amountTotalLeased = blockLeaseData.totalLeased;
 
-        distribute(activeLeasesForBlock, amountTotalLeased, block);
+            distribute(activeLeasesForBlock, amountTotalLeased, block);
+        }
     });
     pay();
 };
