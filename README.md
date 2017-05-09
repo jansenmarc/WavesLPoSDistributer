@@ -9,16 +9,16 @@ npm install
 ```
 Once the dependencies are installed, the script that generates the payouts need to be configured. In order to do so, change the settings of the configuration section:
 ```sh
-/**
-  * Put your settings here:
-  *     - address: the address of your node that you want to distribute from
-  *     - startBlockHeight: the block from which you want to start distribution for
-  *     - endBlock: the block until you want to distribute the earnings
-  *     - distributableMRTPerBlock: amount of MRT distributed per forged block
-  *     - filename: file to which the payments for the mass payment tool are written
-  *     - node: address of your node in the form http://<ip>:<port
-  *     - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
-*/
+/*
+    Put your settings here:
+        - address: the address of your node that you want to distribute from
+        - startBlockHeight: the block from which you want to start distribution for
+        - endBlock: the block until you want to distribute the earnings
+        - distributableMRTPerBlock: amount of MRT distributed per forged block
+        - filename: file to which the payments for the mass payment tool are written
+        - node: address of your node in the form http://<ip>:<port
+        - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
+ */
 var config = {
     address: '',
     startBlockHeight: 462000,
@@ -37,11 +37,11 @@ After the script is finished, the payments that should be distributed to the lea
 ## Doing the payments
 For the actual payout, the masspayment tool needs to be run. Before it could be started, it also needs to be configured:
 ```sh
-/**
- *  Put your settings here:
- *      - filename: file to which the payments for the mass payment tool are written
- *      - node: address of your node in the form http://<ip>:<port>
- *      - apiKey: the API key of the node that is used for distribution
+/*
+ Put your settings here:
+ - filename: file to which the payments for the mass payment tool are written
+ - node: address of your node in the form http://<ip>:<port>
+ - apiKey: the API key of the node that is used for distribution
  */
 var config = {
     filename: 'test.json',
@@ -58,5 +58,20 @@ We decided to use two seperate tools since this allows for additional tests of t
 ```sh
 node apps.js && node massPayment.js
 ```
-## Why do I see negative amounts in the output?
-The tool automatically decucts two transaction fees (one for the Waves transfer, one for the MRT transfer). If a leaser earned less than those transaction fees, the amount that he receives would be negative. Those payments are of course not written to the payment file.
+We strongly recommend to check the payments file before the actual payments are done. In order to foster these checks, we added the _checkPaymentsFile.js_ tool that could need to be configured as follows:
+```sh
+/**
+ * Put your settings here:
+ *     - filename: file to check for payments
+ *     - node: address of your node in the form http://<ip>:<port
+ */
+var config = {
+    filename: '',
+    node: 'http://<ip>:<port>'
+};
+```
+After the configuration the checking tool could be executed with:
+```sh
+node checkPaymentsFile.js
+```
+The output of the tool should provide an information about how man tokens of each asset will be paid by the payment script. After checking this information, you should be ready to execute the payments.
