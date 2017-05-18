@@ -75,3 +75,35 @@ After the configuration the checking tool could be executed with:
 node checkPaymentsFile.js
 ```
 The output of the tool should provide an information about how man tokens of each asset will be paid by the payment script. After checking this information, you should be ready to execute the payments.
+## Airdrops
+Payments for airdrops could be calculated by using the _airdrop.js_ script. Configuration works pretty much the same way as for the other scripts:
+```sh
+/**
+ * Put your settings here:
+ *     - address: the address of your node that you want to distribute from
+ *     - block: the block for which you want to calculate your richlist
+ *     - total: amount of supply for the reference asset
+ *     - amountToDistribute: amount of tokens that you want to distribute (have decimals in mind here...)
+ *     - assetId: id of the reference asset
+ *     - assetToDistributeId: id of the asset you want to airdrop
+ *     - filename: name of the file the payments are written to
+ *     - node: address of your node in the form http://<ip>:<port
+ *     - excludeList: a list of addresses that should not receive the airdrop, e.g., exchanges...
+ */
+var config = {
+    address: '',
+    block: 500859,
+    amountToDistribute: 35000000,
+    assetId: '',
+    assetToDistributeId: '',
+    filename: '',
+    node: '',
+    excludeList: []
+};
+```
+Afterwards, the script could be started with:
+```sh
+node airdrop.js
+```
+## Disclaimer
+Please always test your resulting payment scripts, e.g., with the _checkPaymentsFile.js_ script!
