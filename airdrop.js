@@ -116,7 +116,7 @@ var sendToRecipients = function(txList, index) {
     if (index < txList.length) {
         sendToRecipients(txList, index);
     } else {
-        fs.writeFile(filename, JSON.stringify(payments), {}, function(err) {
+        fs.writeFile(config.filename, JSON.stringify(payments), {}, function(err) {
             if (err) {
                 console.log(err);
             }
