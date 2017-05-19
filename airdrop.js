@@ -21,7 +21,7 @@ var config = {
     assetToDistributeId: '',
     filename: '',
     node: '',
-    excludeList: []
+    excludeList: [ ]
 };
 
 var total = 0;
@@ -42,7 +42,7 @@ var start = function() {
     }).getBody());
 
     config.excludeList.forEach(function(excludeAddress) {
-        richlist[excludeAddress + assetId] = 0;
+        richlist[config.excludeAddress + config.assetId] = 0;
     });
     total = checkTotalDistributableAmount(richlist);
     startDistribute(richlist);
