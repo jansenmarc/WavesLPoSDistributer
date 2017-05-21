@@ -42,7 +42,7 @@ var start = function() {
     }).getBody());
 
     config.excludeList.forEach(function(excludeAddress) {
-        richlist[config.excludeAddress + config.assetId] = 0;
+        richlist[excludeAddress + config.assetId] = 0;
     });
     total = checkTotalDistributableAmount(richlist);
     startDistribute(richlist);
