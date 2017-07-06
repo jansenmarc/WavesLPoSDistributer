@@ -7,8 +7,8 @@ var request = require('request');
  *     - node: address of your node in the form http://<ip>:<port
  */
 var config = {
-    filename: '',
-    node: 'http://<ip>:<port>'
+    filename: 'test.json',
+    node: 'http://188.166.161.66:6869'
 };
 
 var payments;
@@ -21,6 +21,7 @@ var assetsFound = 0;
 var start = function() {
     var paymentsString = fs.readFileSync(config.filename).toString();
     payments = JSON.parse(paymentsString);
+    console.log(payments.length + ' payments found!');
 
     payments.forEach(function(payment) {
         if (payment.assetId) {
@@ -73,10 +74,10 @@ var addAssetInfo = function(assets, cb) {
                     var asset = JSON.parse(body);
 
                     counter++;
-                    assets[assetId].decimals = asset.decimals;
-                    assets[assetId].name = asset.name;
+                    assets[asset.assetId].decimals = asset.decimals;
+                    assets[asset.assetId].name = asset.name;
 
-                    if (assetsFound = counter) {
+                    if (assetsFound - 1 === counter) {
                         cb();
                     }
                 }
