@@ -77,7 +77,7 @@ var addAssetInfo = function(assets, cb) {
                     assets[asset.assetId].decimals = asset.decimals;
                     assets[asset.assetId].name = asset.name;
 
-                    if (assetsFound - 1 === counter) {
+                    if (assetsFound -1 === counter) {
                         cb();
                     }
                 }

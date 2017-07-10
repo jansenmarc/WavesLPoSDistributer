@@ -40,11 +40,11 @@ var myForgedBlocks = [];
 var start = function() {
     console.log('getting blocks...');
     var blocks = getAllBlocks();
+    console.log('preparing datastructures...');
+    prepareDataStructure(blocks);
     if (fs.existsSync(config.blockStorage)) {
         fs.unlinkSync(config.blockStorage);
     }
-    console.log('preparing datastructures...');
-    prepareDataStructure(blocks);
     blocks.forEach(function(block) {
         var transactions = block.transactions;
         var blockInfo = {
