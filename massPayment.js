@@ -8,7 +8,7 @@ var request = require('request');
  *      - apiKey: the API key of the node that is used for distribution
  */
 var config = {
-    filename: 'test.json',
+    filename: '<your payments file>',
     node: 'http://<ip>:<port>',
     apiKey: 'put the apiKey for the node here'
 };
@@ -37,11 +37,15 @@ var start = function() {
 var doPayment = function(payments, counter) {
     var payment = payments[counter];
     setTimeout(function() {
-        request.post({ url: config.node + '/assets/transfer', json: payment, headers: { "Accept": "application/json", "Content-Type": "application/json", "api_key": config.apiKey } }, function(err) {
+        request.post({ url: config.node + '/assets/transfer', json: payment, headers: { "Accept": "application/json", "Content-Type": "application/json", "api_key": config.apiKey } }, function(err, response, body) {
             if (err) {
                 console.log(err);
             } else {
-                console.log(counter + ' send ' + payment.amount + ' of ' + payment.assetId + ' to ' + payment.recipient + '!');
+                if (body.error) {
+                    console.log('error during transfer: ' + body.message);
+                } else {
+                    console.log(counter + ' send ' + payment.amount + ' of ' + payment.assetId + ' to ' + payment.recipient + '!');
+                }
                 counter++;
                 if (counter < payments.length) {
                     doPayment(payments, counter);
