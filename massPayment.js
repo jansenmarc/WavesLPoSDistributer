@@ -6,11 +6,15 @@ var request = require('request');
  *      - filename: file to which the payments for the mass payment tool are written
  *      - node: address of your node in the form http://<ip>:<port>
  *      - apiKey: the API key of the node that is used for distribution
+ *      - feeAssetId: id of the asset used to pay the fee, null for Waves
+ *      - fee: amount of fee to spend for the tx
  */
 var config = {
     filename: '<your payments file>',
     node: 'http://<ip>:<port>',
-    apiKey: 'put the apiKey for the node here'
+    apiKey: 'put the apiKey for the node here',
+    feeAssetId: null,
+    fee: 10000
 };
 
 /**
@@ -36,6 +40,12 @@ var start = function() {
  */
 var doPayment = function(payments, counter) {
     var payment = payments[counter];
+
+    if (config.feeAssetId !== null) {
+        payment.feeAssetId = config.feeAssetId;
+        payment.fee = config.fee;
+    }
+
     setTimeout(function() {
         request.post({ url: config.node + '/assets/transfer', json: payment, headers: { "Accept": "application/json", "Content-Type": "application/json", "api_key": config.apiKey } }, function(err, response, body) {
             if (err) {
