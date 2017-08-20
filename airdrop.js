@@ -35,14 +35,14 @@ var totalDistributed = 0;
  * masspayment tool.
  */
 var start = function() {
-    var richlist = JSON.parse(syncRequest('GET', config.node + '/debug/state/' + config.block, {
+    var richlist = JSON.parse(syncRequest('GET', config.node + '/assets/' + config.assetId + '/distribution', {
         'headers': {
             'Connection': 'keep-alive'
         }
     }).getBody());
 
     config.excludeList.forEach(function(excludeAddress) {
-        richlist[excludeAddress + config.assetId] = 0;
+        richlist[excludeAddress] = 0;
     });
     total = checkTotalDistributableAmount(richlist);
     startDistribute(richlist);
@@ -59,9 +59,7 @@ var checkTotalDistributableAmount = function(richlist) {
     for (var address in richlist) {
         var amount = richlist[address];
 
-        if (address.endsWith(config.assetId)) {
-            total += amount;
-        }
+        total += amount;
     }
 
     return total;
@@ -79,14 +77,12 @@ var startDistribute = function(richlist) {
     for (var address in richlist) {
         var amount = richlist[address];
 
-        if (address.endsWith(config.assetId)) {
-            var percentage = amount / total;
-            var amountToSend = Math.floor(config.amountToDistribute * percentage);
+        var percentage = amount / total;
+        var amountToSend = Math.floor(config.amountToDistribute * percentage);
 
 
-            totalDistributed += Number(amountToSend);
-            transactions.push({ address: address.substring(0, 35), amount: amountToSend });
-        }
+        totalDistributed += Number(amountToSend);
+        transactions.push( { address: address, amount: amountToSend });
     }
 
     sendToRecipients(transactions, 0);
