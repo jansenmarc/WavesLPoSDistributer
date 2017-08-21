@@ -4,7 +4,7 @@ var fs = require('fs');
 /**
  * Put your settings here:
  *     - address: the address of your node that you want to distribute from
- *     - block: the block for which you want to calculate your richlist
+ *     - block: the block for which you want to calculate your richlist (only used for distribution to Waves holders)
  *     - total: amount of supply for the reference asset
  *     - amountToDistribute: amount of tokens that you want to distribute (have decimals in mind here...)
  *     - assetId: id of the reference asset
@@ -35,11 +35,21 @@ var totalDistributed = 0;
  * masspayment tool.
  */
 var start = function() {
-    var richlist = JSON.parse(syncRequest('GET', config.node + '/assets/' + config.assetId + '/distribution', {
-        'headers': {
-            'Connection': 'keep-alive'
-        }
-    }).getBody());
+    var richlist;
+
+    if (config.assetId && config.assetId.length > 0) {
+        richlist= JSON.parse(syncRequest('GET', config.node + '/assets/' + config.assetId + '/distribution', {
+            'headers': {
+                'Connection': 'keep-alive'
+            }
+        }).getBody());
+    } else {
+        richlist= JSON.parse(syncRequest('GET', config.node + '/debug/stateWaves/' + config.block, {
+            'headers': {
+                'Connection': 'keep-alive'
+            }
+        }).getBody());
+    }
 
     config.excludeList.forEach(function(excludeAddress) {
         richlist[excludeAddress] = 0;
