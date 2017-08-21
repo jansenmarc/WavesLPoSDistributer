@@ -70,7 +70,6 @@ var addAssetInfo = function(assets, cb) {
     for (var assetId in assets) {
         if (assetId !== 'Waves') {
             request.get(config.node + '/transactions/info/' + assetId, function(err, response, body) {
-                console.log(body);
                 if (!err) {
                     var asset = JSON.parse(body);
 
