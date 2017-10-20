@@ -1,5 +1,6 @@
-var request = require('sync-request');
+var request = require('sync-request');	
 var LineReaderSync = require("line-reader-sync")
+var sleep = require('sleep');
 
 var fs = require('fs');
 
@@ -16,11 +17,11 @@ var fs = require('fs');
  */
 var config = {
     address: '',
-    startBlockHeight: 462000,
-    endBlock: 465000,
-    distributableMrtPerBlock: 15,
+    startBlockHeight: 0,
+    endBlock: 1,
+    distributableMrtPerBlock: 5,
     filename: 'test.json',
-    node: 'http://localhost:6870',
+    node: 'http://<ip>:6869',
     percentageOfFeesToDistribute: 100,
     blockStorage: 'blocks.json'
 };
@@ -40,13 +41,22 @@ var myForgedBlocks = [];
 var start = function() {
     console.log('getting blocks...');
     var blocks = getAllBlocks();
-    console.log('preparing datastructures...');
-    prepareDataStructure(blocks);
     if (fs.existsSync(config.blockStorage)) {
         fs.unlinkSync(config.blockStorage);
     }
     blocks.forEach(function(block) {
-        var transactions = block.transactions;
+        var transactions = [];
+ 	
+    	if (block.height < config.startBlockHeight) {
+	        block.transactions.forEach(function(tx) {
+	        	if (tx.type === 8 || tx.type === 9) {
+	    	        transactions.push(tx);
+	    	    }
+	        });
+	    } else {
+	        transactions = block.transactions;
+	    }
+
         var blockInfo = {
             height: block.height,
             generator: block.generator,
@@ -55,7 +65,8 @@ var start = function() {
         };
         fs.appendFileSync(config.blockStorage, JSON.stringify(blockInfo) + '\n');
     });
-
+    console.log('preparing datastructures...');
+    prepareDataStructure(blocks);
     console.log('preparing payments...');
     myForgedBlocks.forEach(function(block) {
         if (block.height >= config.startBlockHeight && block.height <= config.endBlock) {
@@ -94,7 +105,11 @@ var prepareDataStructure = function(blocks) {
             }
             // considering Waves fees
             if (!transaction.feeAsset || transaction.feeAsset === '' || transaction.feeAsset === null) {
-                wavesFees += transaction.fee;
+        		if (transaction.fee < 10 * Math.pow(10, 8)) {
+                    wavesFees += transaction.fee;
+		        } else {
+			        //console.log('probably wrong tx fee in tx: ' + JSON.stringify(transaction));
+		        }
             }
         });
         block.wavesFees = wavesFees;
@@ -107,10 +122,12 @@ var prepareDataStructure = function(blocks) {
  * @returns {Array} all relevant blocks
  */
 var getAllBlocks = function() {
+    sleep.msleep(1000);
     // leases have been resetted in block 462000, therefore, this is the first relevant block to be considered
     var firstBlockWithLeases = 462000;
     var currentStartBlock = firstBlockWithLeases;
     var blocks = [];
+    var steps = 100;
 
     if (fs.existsSync(config.blockStorage)) {
         lrs = new LineReaderSync(config.blockStorage);
@@ -130,15 +147,22 @@ var getAllBlocks = function() {
     }
 
     while (currentStartBlock < config.endBlock) {
+        sleep.msleep(500);
         var currentBlocks;
 
-        if (currentStartBlock + 99 < config.endBlock) {
-            console.log('getting blocks from ' + currentStartBlock + ' to ' + (currentStartBlock + 99));
-            currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + (currentStartBlock + 99), {
+        if (currentStartBlock + (steps - 1) < config.endBlock) {
+            console.log('getting blocks from ' + currentStartBlock + ' to ' + (currentStartBlock + (steps - 1)));
+            var res = request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + (currentStartBlock + (steps - 1)), {
                 'headers': {
                     'Connection': 'keep-alive'
                 }
-            }).getBody('utf8'));
+            });
+            if (res.body) {
+                var blocksJSON = res.body.toString();
+                currentBlocks = JSON.parse(blocksJSON);
+            } else {
+                currentBlocks = [];
+            }
         } else {
             console.log('getting blocks from ' + currentStartBlock + ' to ' + config.endBlock);
             currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + config.endBlock, {
@@ -147,16 +171,18 @@ var getAllBlocks = function() {
                 }
             }).getBody('utf8'));
         }
-        currentBlocks.forEach(function(block) {
-            if (block.height <= config.endBlock) {
-                blocks.push(block);
-            }
-        });
+        if (currentBlocks.length > 0) {
+            currentBlocks.forEach(function(block) {
+                if (block.height <= config.endBlock) {
+                    blocks.push(block);
+                }
+            });
 
-        if (currentStartBlock + 100 < config.endBlock) {
-            currentStartBlock += 100;
-        } else {
-            currentStartBlock = config.endBlock;
+            if (currentStartBlock + steps < config.endBlock) {
+                currentStartBlock += steps;
+            } else {
+                currentStartBlock = config.endBlock;
+            }
         }
     }
 
@@ -171,7 +197,7 @@ var getAllBlocks = function() {
  * @param amountTotalLeased total amount of leased waves in this particular block
  * @param block the block to consider
  */
-var distribute = function(activeLeases, amountTotalLeased, block) {
+var distribute = function(activeLeases, amountTotalLeased, block, blockCount) {
     var fee = block.wavesFees;
 
     for (var address in activeLeases) {
@@ -186,8 +212,6 @@ var distribute = function(activeLeases, amountTotalLeased, block) {
             payments[address] = amount * (config.percentageOfFeesToDistribute / 100);
             mrt[address] = amountMRT;
         }
-
-        //console.log(address + ' will receive ' + amount + ' of(' + fee + ') and ' + amountMRT + ' MRT for block: ' + block.height + ' share: ' + share);
     }
 };
 
@@ -198,12 +222,11 @@ var distribute = function(activeLeases, amountTotalLeased, block) {
 var pay = function() {
     var transactions = [];
     for (var address in payments) {
-        var payment = (payments[address] / Math.pow(10, 8)) - 0.002;
-        //console.log(address + ' will receive ' + parseFloat(payment).toFixed(8) + ' and ' + parseFloat(mrt[address]).toFixed(2) + ' MRT!');
+        var payment = (payments[address] / Math.pow(10, 8));
 
         if (payment > 0) {
             transactions.push({
-                "amount": Number(Math.round(payments[address] - 200000)),
+        		"amount": Number(Math.round(payments[address])),
                 "fee": 100000,
                 "sender": config.address,
                 "attachment": "",
