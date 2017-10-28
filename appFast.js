@@ -7,6 +7,7 @@ var fs = require('fs');
 /**
   * Put your settings here:
   *     - address: the address of your node that you want to distribute from
+  *     - alias: the alias for the adrres, null if there no alias defined yet (just in case: do it! :) )
   *     - startBlockHeight: the block from which you want to start distribution for
   *     - endBlock: the block until you want to distribute the earnings
   *     - distributableMRTPerBlock: amount of MRT distributed per forged block
@@ -17,6 +18,7 @@ var fs = require('fs');
  */
 var config = {
     address: '',
+    alias: '',
     startBlockHeight: 0,
     endBlock: 1,
     distributableMrtPerBlock: 5,
@@ -96,7 +98,7 @@ var prepareDataStructure = function(blocks) {
 
         block.transactions.forEach(function(transaction) {
             // type 8 are leasing tx
-            if (transaction.type === 8 && (transaction.recipient === config.address || transaction.recipient === "address:" + config.address)) {
+            if (transaction.type === 8 && (transaction.recipient === config.address || transaction.recipient === "address:" + config.address || transaction.recipient === 'alias:W:' + config.alias)) {
                 transaction.block = block.height;
                 myLeases[transaction.id] = transaction;
             } else if (transaction.type === 9 && myLeases[transaction.leaseId]) { // checking for lease cancel tx
