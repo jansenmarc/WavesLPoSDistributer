@@ -7,7 +7,6 @@ var fs = require('fs');
 /**
   * Put your settings here:
   *     - address: the address of your node that you want to distribute from
-  *     - alias: the alias for the adrres, null if there no alias defined yet (just in case: do it! :) )
   *     - startBlockHeight: the block from which you want to start distribution for
   *     - endBlock: the block until you want to distribute the earnings
   *     - distributableMRTPerBlock: amount of MRT distributed per forged block
@@ -19,13 +18,13 @@ var fs = require('fs');
 var config = {
     address: '',
     alias: '',
-    startBlockHeight: 0,
-    endBlock: 1,
-    distributableMrtPerBlock: 5,
+    startBlockHeight: 773997,
+    endBlock: 776852,
+    distributableMrtPerBlock: 15,
     filename: 'test.json',
-    node: 'http://<ip>:6869',
+    node: '',
     percentageOfFeesToDistribute: 100,
-    blockStorage: 'blocks.json'
+    blockStorage: 'blocks_test.json'
 };
 
 var payments = [];
@@ -49,15 +48,15 @@ var start = function() {
     blocks.forEach(function(block) {
         var transactions = [];
  	
-    	if (block.height < config.startBlockHeight) {
-	        block.transactions.forEach(function(tx) {
-	        	if (tx.type === 8 || tx.type === 9) {
-	    	        transactions.push(tx);
-	    	    }
-	        });
-	    } else {
-	        transactions = block.transactions;
-	    }
+	if (block.height < config.startBlockHeight) {
+	    block.transactions.forEach(function(tx) {
+	    	if (tx.type === 8 || tx.type === 9) {
+	    	    transactions.push(tx);
+	    	}
+	    });
+	} else {
+	    transactions = block.transactions;
+	}
 
         var blockInfo = {
             height: block.height,
@@ -107,11 +106,9 @@ var prepareDataStructure = function(blocks) {
             }
             // considering Waves fees
             if (!transaction.feeAsset || transaction.feeAsset === '' || transaction.feeAsset === null) {
-        		if (transaction.fee < 10 * Math.pow(10, 8)) {
-                    wavesFees += transaction.fee;
-		        } else {
-			        //console.log('probably wrong tx fee in tx: ' + JSON.stringify(transaction));
-		        }
+                if (transaction.fee < 10 * Math.pow(10, 8)) {
+                            wavesFees += transaction.fee;
+                }
             }
         });
         block.wavesFees = wavesFees;
@@ -149,7 +146,7 @@ var getAllBlocks = function() {
     }
 
     while (currentStartBlock < config.endBlock) {
-        sleep.msleep(500);
+	sleep.msleep(500);
         var currentBlocks;
 
         if (currentStartBlock + (steps - 1) < config.endBlock) {
@@ -159,12 +156,12 @@ var getAllBlocks = function() {
                     'Connection': 'keep-alive'
                 }
             });
-            if (res.body) {
-                var blocksJSON = res.body.toString();
-                currentBlocks = JSON.parse(blocksJSON);
-            } else {
-                currentBlocks = [];
-            }
+	    if (res.body) {
+	    	var blocksJSON = res.body.toString();
+	    	currentBlocks = JSON.parse(blocksJSON);
+	    } else {
+		currentBlocks = [];
+	    }
         } else {
             console.log('getting blocks from ' + currentStartBlock + ' to ' + config.endBlock);
             currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + config.endBlock, {
@@ -173,19 +170,19 @@ var getAllBlocks = function() {
                 }
             }).getBody('utf8'));
         }
-        if (currentBlocks.length > 0) {
+    	if (currentBlocks.length > 0) {
             currentBlocks.forEach(function(block) {
-                if (block.height <= config.endBlock) {
+            	if (block.height <= config.endBlock) {
                     blocks.push(block);
-                }
+            	}
             });
 
             if (currentStartBlock + steps < config.endBlock) {
-                currentStartBlock += steps;
+            	currentStartBlock += steps;
             } else {
-                currentStartBlock = config.endBlock;
+            	currentStartBlock = config.endBlock;
             }
-        }
+	    }
     }
 
     return blocks;
