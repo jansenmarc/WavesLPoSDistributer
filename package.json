@@ -16,7 +16,6 @@
   "dependencies": {
     "line-reader-sync": "^0.1.0",
     "request": "^2.81.0",
-    "sleep": "^5.1.1",
     "sync-request": "^4.0.2"
   }
 }

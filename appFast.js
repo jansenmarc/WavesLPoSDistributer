@@ -1,6 +1,5 @@
 var request = require('sync-request');	
 var LineReaderSync = require("line-reader-sync")
-var sleep = require('sleep');
 
 var fs = require('fs');
 
@@ -121,7 +120,6 @@ var prepareDataStructure = function(blocks) {
  * @returns {Array} all relevant blocks
  */
 var getAllBlocks = function() {
-    sleep.msleep(1000);
     // leases have been resetted in block 462000, therefore, this is the first relevant block to be considered
     var firstBlockWithLeases = 462000;
     var currentStartBlock = firstBlockWithLeases;
@@ -146,7 +144,6 @@ var getAllBlocks = function() {
     }
 
     while (currentStartBlock < config.endBlock) {
-	sleep.msleep(500);
         var currentBlocks;
 
         if (currentStartBlock + (steps - 1) < config.endBlock) {
