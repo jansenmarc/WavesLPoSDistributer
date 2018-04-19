@@ -105,5 +105,30 @@ Afterwards, the script could be started with:
 ```sh
 node airdrop.js
 ```
+## Mass transfer payouts
+The generated payout files could now also be used as inputs for mass transfer transactions. this provides a faster and cheaper way to distribute funds.
+```sh
+python massPayment.py
+```
+Configuration is done via the configuration section:
+```sh
+'''
+    Configuration section:
+        privateKey: the private key of the address you want to distribute from
+        file: the calculated payout file
+        timeout: timeout between requests send to nodes in ms
+        assetId: the id of the asset you want to distribute, '' for Waves
+        nodes: a list of nodes to which the signed transactions should be send to, in the format: http://host:port
+'''
+config = {
+	'privateKey': '',
+	'file': '',
+	# timeout between requests in ms
+	'timeout': 20,
+	'assetId': '',
+	'nodes': [
+	]
+}
+```
 ## Disclaimer
 Please always test your resulting payment scripts, e.g., with the _checkPaymentsFile.js_ script!
