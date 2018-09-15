@@ -71,7 +71,8 @@ with open(config['file']) as json_data:
 			pay(currentBatch)
 			currentBatch = []
 			time.sleep(config['timeout'] / 1000)
-	pay(currentBatch)
+	if (len(currentBatch) > 0):
+	    pay(currentBatch)
 	print('planned payouts: ' + str(totalPayments) + ', paid: ' + str(paid))
 	usedTime = time.time() - startTime
 	print('time: ' + str(usedTime) + ' (' + str(totalPayments / usedTime) + 'transfers/s)')
