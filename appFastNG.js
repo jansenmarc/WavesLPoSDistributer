@@ -118,6 +118,9 @@ var prepareDataStructure = function(blocks) {
         if (previousBlock) {
             block.previousBlockWavesFees = previousBlock.wavesFees;
         }
+        if (block.height >= 1740000) {
+            wavesFees += block.reward;
+        }
         block.wavesFees = wavesFees;
         previousBlock = block;
     });
