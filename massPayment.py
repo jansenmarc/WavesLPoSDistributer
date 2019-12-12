@@ -9,7 +9,6 @@ import time
         file: the calculated payout file
         timeout: timeout between requests send to nodes in ms
         assetId: the id of the asset you want to distribute, '' for Waves
-        attachment: attachment in clear text
         nodes: a list of nodes to which the signed transactions should be send to, in the format: http://host:port
 '''
 config = {
@@ -18,8 +17,8 @@ config = {
 	# timeout between requests in ms
 	'timeout': 20,
 	'assetId': '',
-  'attachment': '',
-	'nodes': []
+	'nodes': [
+	]
 }
 
 startTime = time.time()
@@ -51,7 +50,7 @@ def pay(batch):
 	paid += len(batch)
 	if (config['assetId'] != ''):
 		print('paying in asset: ' + config['assetId'])
-		tx = address.massTransferAssets(batch, pw.Asset(config['assetId']), config['attachment'])
+		tx = address.massTransferAssets(batch, pw.Asset(config['assetId']))
 	else:
 		print('paying in Waves!')
 		tx = address.massTransferWaves(batch)
