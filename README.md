@@ -9,24 +9,31 @@ npm install
 ```
 Once the dependencies are installed, the script that generates the payouts need to be configured. In order to do so, change the settings of the configuration section:
 ```sh
-/*
-    Put your settings here:
-        - address: the address of your node that you want to distribute from
-        - startBlockHeight: the block from which you want to start distribution for
-        - endBlock: the block until you want to distribute the earnings
-        - distributableMRTPerBlock: amount of MRT distributed per forged block
-        - filename: file to which the payments for the mass payment tool are written
-        - node: address of your node in the form http://<ip>:<port
-        - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
+/**
+ * Put your settings here:
+ *     - address: the address of your node that you want to distribute from
+ *     - alias: the alias of the node address
+ *     - startBlockHeight: the block from which you want to start distribution for
+ *     - endBlock: the block until you want to distribute the earnings
+ *     - firstBlockWithLeases: the block where you received the first lease
+ *     - distributableMRTPerBlock: amount of MRT distributed per forged block
+ *     - filename: file to which the payments for the mass payment tool are written
+ *     - node: address of your node in the form http://<ip>:<port
+ *     - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
+ *     - blockStorage: file for storing block history
  */
+
 var config = {
     address: '',
-    startBlockHeight: 462000,
-    endBlock: 465000,
+    alias: '',
+    startBlockHeight: 1800000,
+    endBlock: 1820000,
+    firstBlockWithLeases: 1800010,
     distributableMrtPerBlock: 20,
     filename: 'test.json',
     node: 'http://<ip>:6869',
-    percentageOfFeesToDistribute: 100
+    percentageOfFeesToDistribute: 100,
+    blockStorage: 'block.json'
 }
 ```
 After a successful configuration of the tool, it could be started with:
