@@ -22,7 +22,7 @@ var config = {
     alias: '',
     startBlockHeight: 462000,
     endBlock: 465000,
-    firstBlockWithLeases: 463000,
+    firstBlockWithLeases: 462000,
     distributableMrtPerBlock: 0,
     filename: 'payments.json',
     node: 'http://127.0.0.1:6869',
