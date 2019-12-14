@@ -9,21 +9,24 @@ var fs = require('fs');
  *     - alias: the alias of the node address
  *     - startBlockHeight: the block from which you want to start distribution for
  *     - endBlock: the block until you want to distribute the earnings
+ *     - firstBlockWithLeases: the block where you received the first lease
  *     - distributableMRTPerBlock: amount of MRT distributed per forged block
  *     - filename: file to which the payments for the mass payment tool are written
  *     - node: address of your node in the form http://<ip>:<port
  *     - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
  *     - blockStorage: file for storing block history
  */
+
 var config = {
     address: '',
     alias: '',
-    startBlockHeight: 803133,
-    endBlock: 808388,
-    distributableWfnPerBlock: 0,
-    filename: 'test.json',
-    node: 'http://<ip>:6869',
-    percentageOfFeesToDistribute: 100,
+    startBlockHeight: 462000,
+    endBlock: 465000,
+    firstBlockWithLeases: 462000,
+    distributableMrtPerBlock: 0,
+    filename: 'payments.json',
+    node: 'http://127.0.0.1:6869',
+    percentageOfFeesToDistribute: 90,
     blockStorage: 'blocks.json'
 };
 
@@ -133,7 +136,7 @@ var prepareDataStructure = function(blocks) {
  */
 var getAllBlocks = function() {
     // leases have been resetted in block 462000, therefore, this is the first relevant block to be considered
-    var firstBlockWithLeases = 462000;
+    var firstBlockWithLeases = config.firstBlockWithLeases;
     var currentStartBlock = firstBlockWithLeases;
     var blocks = [];
     var steps = 100;
