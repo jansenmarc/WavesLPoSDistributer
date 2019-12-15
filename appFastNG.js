@@ -1,23 +1,9 @@
 var request = require('sync-request');
 var LineReaderSync = require("line-reader-sync")
-
 var fs = require('fs');
 
-/**
- * Put your settings here:
- *     - address: the address of your node that you want to distribute from
- *     - alias: the alias of the node address
- *     - startBlockHeight: the block from which you want to start distribution for
- *     - endBlock: the block until you want to distribute the earnings
- *     - firstBlockWithLeases: the block where you received the first lease
- *     - distributableMRTPerBlock: amount of MRT distributed per forged block
- *     - filename: file to which the payments for the mass payment tool are written
- *     - node: address of your node in the form http://<ip>:<port
- *     - percentageOfFeesToDistribute: the percentage of Waves fees that you want to distribute
- *     - blockStorage: file for storing block history
- */
-
 const config = require('./config.json');
+
 var payments = [];
 var mrt = [];
 var myLeases = {};
@@ -30,8 +16,9 @@ var myForgedBlocks = [];
  * and serializing them into a file that could be used as input for the
  * masspayment tool.
  */
+
 var start = function() {
-    console.log('getting blocks from ' + config.startBlockHeight + ' to ' + config.endBlock + '...');
+    console.log('--- Getting blocks from ' + config.startBlockHeight + ' to ' + config.endBlock + '---');
     var blocks = getAllBlocks();
     if (fs.existsSync(config.blockStorage)) {
         fs.unlinkSync(config.blockStorage);
