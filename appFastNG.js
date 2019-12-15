@@ -1,6 +1,7 @@
 var request = require('sync-request');
 var LineReaderSync = require("line-reader-sync")
 var fs = require('fs');
+var Base58 = require('base-58');
 
 const config = require('./config.json');
 
@@ -18,12 +19,12 @@ var myForgedBlocks = [];
  */
 
 var start = function() {
-    console.log('--- Getting blocks from ' + config.startBlockHeight + ' to ' + config.endBlock + '---');
+    log('--- Getting blocks from ' + config.startBlockHeight + ' to ' + config.endBlock + '---');
     var blocks = getAllBlocks();
     if (fs.existsSync(config.blockStorage)) {
         fs.unlinkSync(config.blockStorage);
     }
-    console.log('preparing datastructures...');
+    log('preparing datastructures...');
     prepareDataStructure(blocks);
     blocks.forEach(function(block) {
         var transactions = [];
@@ -50,7 +51,7 @@ var start = function() {
         }
         fs.appendFileSync(config.blockStorage, JSON.stringify(blockInfo) + '\n');
     });
-    console.log('preparing payments...');
+    log('preparing payments...');
     myForgedBlocks.forEach(function(block) {
         if (block.height >= config.startBlockHeight && block.height <= config.endBlock) {
             var blockLeaseData = getActiveLeasesAtBlock(block);
@@ -128,18 +129,19 @@ var getAllBlocks = function() {
         }
 
         currentStartBlock = blocks[blocks.length - 1].height + 1;
-        console.log('retrieved blocks from ' + blocks[0].height + ' to ' + (currentStartBlock - 1));
+        log('retrieved blocks from ' + blocks[0].height + ' to ' + (currentStartBlock - 1));
     }
 
     while (currentStartBlock < config.endBlock) {
         var currentBlocks;
 
         if (currentStartBlock + (steps - 1) < config.endBlock) {
-            console.log('getting blocks from ' + currentStartBlock + ' to ' + (currentStartBlock + (steps - 1)));
+            log('getting blocks from ' + currentStartBlock + ' to ' + (currentStartBlock + (steps - 1)));
             var res = request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + (currentStartBlock + (steps - 1)), {
                 'headers': {
                     'Connection': 'keep-alive'
-                }
+                },
+                'timeout': false,
             });
             if (res.body) {
                 var blocksJSON = res.body.toString();
@@ -148,11 +150,12 @@ var getAllBlocks = function() {
                 currentBlocks = [];
             }
         } else {
-            console.log('getting blocks from ' + currentStartBlock + ' to ' + config.endBlock);
+            log('getting blocks from ' + currentStartBlock + ' to ' + config.endBlock);
             currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + config.endBlock, {
                 'headers': {
                     'Connection': 'keep-alive'
-                }
+                },
+                'timeout': false,
             }).getBody('utf8'));
         }
         if (currentBlocks.length > 0) {
@@ -170,7 +173,7 @@ var getAllBlocks = function() {
         }
     }
 
-    return blocks;
+    return blocks;  
 };
 
 /**
@@ -221,7 +224,7 @@ var pay = function() {
                 "amount": Number(Math.round(payments[address])),
                 "fee": 100000,
                 "sender": config.address,
-                "attachment": "",
+                "attachment": Base58.encode(new Buffer.from(config.attachment)),
                 "recipient": address
             });
         }
@@ -231,16 +234,16 @@ var pay = function() {
                 "fee": 100000,
                 "assetId": "4uK8i4ThRGbehENwa6MxyLtxAjAo1Rj9fduborGExarC",
                 "sender": config.address,
-                "attachment": "",
+                "attachment": Base58.encode(new Buffer.from(config.attachment)),
                 "recipient": address
             });
         }
     }
     fs.writeFile(config.filename, JSON.stringify(transactions), {}, function(err) {
         if (!err) {
-            console.log('payments written to ' + config.filename + '!');
+            log('payments written to ' + config.filename + '!');
         } else {
-            console.log(err);
+            log(err);
         }
     });
 };
@@ -252,6 +255,7 @@ var pay = function() {
  * @param block the block to consider
  * @returns {{totalLeased: number, activeLeases: {}}} total amount of leased waves and active leases for the given block
  */
+ 
 var getActiveLeasesAtBlock = function(block) {
     var activeLeases = [];
     var totalLeased = 0;
@@ -278,5 +282,34 @@ var getActiveLeasesAtBlock = function(block) {
 
     return { totalLeased: totalLeased, activeLeases: activeLeasesPerAddress };
 };
+
+function log(message)
+{    
+    console.log(getDateTime() + ' ' + message);    
+}
+
+function getDateTime() {
+
+    var date = new Date();
+
+    var hour = date.getHours();
+    hour = (hour < 10 ? "0" : "") + hour;
+
+    var min  = date.getMinutes();
+    min = (min < 10 ? "0" : "") + min;
+
+    var sec  = date.getSeconds();
+    sec = (sec < 10 ? "0" : "") + sec;
+
+    var year = date.getFullYear();
+
+    var month = date.getMonth() + 1;
+    month = (month < 10 ? "0" : "") + month;
+
+    var day  = date.getDate();
+    day = (day < 10 ? "0" : "") + day;
+
+    return year + ":" + month + ":" + day + ":" + hour + ":" + min + ":" + sec;
+}
 
 start();
