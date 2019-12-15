@@ -7,15 +7,19 @@ First of all, you need to install Node.js (https://nodejs.org/en/) and NPM. Afte
 mkdir node_modules
 npm install
 ```
-Once the dependencies are installed, the script that generates the payouts need to be configured. In order to do so, change the settings of the configuration section:
+Once the dependencies are installed, the script that generates the payouts need to be configured. In order to do so:
+
+copy config.json.sample config.json
+
+, change the settings of the configuration file:
 ```sh
 /**
  * Put your settings here:
  *     - address: the address of your node that you want to distribute from
  *     - alias: the alias of the node address
  *     - startBlockHeight: the block from which you want to start distribution for
- *     - endBlock: the block until you want to distribute the earnings
  *     - firstBlockWithLeases: the block where you received the first lease
+ *     - endBlock: the block until you want to distribute the earnings
  *     - distributableMRTPerBlock: amount of MRT distributed per forged block
  *     - filename: file to which the payments for the mass payment tool are written
  *     - node: address of your node in the form http://<ip>:<port
@@ -23,25 +27,28 @@ Once the dependencies are installed, the script that generates the payouts need 
  *     - blockStorage: file for storing block history
  */
 
-var config = {
-    address: '',
-    alias: '',
-    startBlockHeight: 1800000,
-    endBlock: 1820000,
-    firstBlockWithLeases: 1800010,
-    distributableMrtPerBlock: 20,
-    filename: 'test.json',
-    node: 'http://<ip>:6869',
-    percentageOfFeesToDistribute: 100,
-    blockStorage: 'block.json'
+{
+"address":"",
+"alias":"",
+"startBlockHeight":462000,
+"firstBlockWithLeases":463000,
+"endBlock":465000,
+"distributableMRTPerBlock":0,
+"filename":"payments.json",
+"node":"http://<ip>:6869",
+"percentageOfFeesToDistribute":90,
+"blockStorage":"blocks.json"
 }
+
 ```
 After a successful configuration of the tool, it could be started with:
 ```sh
-node app.js
+node appFastNG.js
 ```
-After the script is finished, the payments that should be distributed to the leasers are written to the file configured by the _config.filename_ setting in the configuration section.
+After the script is finished, the payments that should be distributed to the leasers are written to the file configured by the filename setting in the configuration file.
+
 ## Doing the payments
+
 For the actual payout, the masspayment tool needs to be run. Before it could be started, it also needs to be configured:
 ```sh
 /*
@@ -63,7 +70,7 @@ node massPayment.js
 ## Why two seperate tools?
 We decided to use two seperate tools since this allows for additional tests of the payments before the payments are actually executed. On the other hand, it does not provide any drawback since both scripts could also be called directly one after the other with:
 ```sh
-node apps.js && node massPayment.js
+node appFastNG.js && node massPayment.js
 ```
 We strongly recommend to check the payments file before the actual payments are done. In order to foster these checks, we added the _checkPaymentsFile.js_ tool that could need to be configured as follows:
 ```sh

@@ -1,0 +1,12 @@
+{
+"address":"",
+"alias":"", 
+"startBlockHeight":462000,
+"firstBlockWithLeases":463000,
+"endBlock":465000,
+"distributableMRTPerBlock":0,
+"filename":"payments.json",
+"node":"http://<ip>:<port>",
+"percentageOfFeesToDistribute":90,
+"blockStorage":"blocks.json"
+}

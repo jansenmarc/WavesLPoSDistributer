@@ -17,18 +17,22 @@ var fs = require('fs');
  *     - blockStorage: file for storing block history
  */
 
+const config = require('./config.json');
+
+/*
 var config = {
-    address: '',
-    alias: '',
-    startBlockHeight: 462000,
-    endBlock: 465000,
-    firstBlockWithLeases: 462000,
-    distributableMrtPerBlock: 0,
+    address: '3P2ek9y4i64aSG9psm2Ge1S5MrgRUouVHoF',
+    alias: 'shockwavesnode',
+    startBlockHeight: 1834254,
+    endBlock: 1838665,
+    firstBlockWithLeases: 1834254,
+    distributableWfnPerBlock: 0,
     filename: 'payments.json',
-    node: 'http://127.0.0.1:6869',
+    node: 'http://144.91.84.49',
     percentageOfFeesToDistribute: 90,
     blockStorage: 'blocks.json'
 };
+*/
 
 var payments = [];
 var mrt = [];
@@ -43,7 +47,7 @@ var myForgedBlocks = [];
  * masspayment tool.
  */
 var start = function() {
-    console.log('getting blocks...');
+    console.log('getting blocks from ' + config.startBlockHeight + ' to ' + config.endBlock + '...');
     var blocks = getAllBlocks();
     if (fs.existsSync(config.blockStorage)) {
         fs.unlinkSync(config.blockStorage);
@@ -78,7 +82,6 @@ var start = function() {
             var blockLeaseData = getActiveLeasesAtBlock(block);
             var activeLeasesForBlock = blockLeaseData.activeLeases;
             var amountTotalLeased = blockLeaseData.totalLeased;
-
             distribute(activeLeasesForBlock, amountTotalLeased, block);
         }
     });
@@ -99,7 +102,6 @@ var prepareDataStructure = function(blocks) {
         if (block.generator === config.address) {
             myForgedBlocks.push(block);
         }
-
         block.transactions.forEach(function(transaction) {
             // type 8 are leasing tx
             if (transaction.type === 8 && (transaction.recipient === config.address || transaction.recipient === "address:" + config.address || transaction.recipient === 'alias:W:' + config.alias)) {
