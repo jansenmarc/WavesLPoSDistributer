@@ -7,11 +7,11 @@ First of all, you need to install Node.js (https://nodejs.org/en/) and NPM. Afte
 mkdir node_modules
 npm install
 ```
-Once the dependencies are installed, the script that generates the payouts need to be configured. In order to do so:
-
+Once the dependencies are installed, the script that generates the payouts need to be configured. In order to do so you need to make a copy of the configuration file sample:
+```sh
 copy config.json.sample config.json
-
-, change the settings of the configuration file:
+```
+Once you made the copy, change the settings of the configuration file _config.json_
 ```sh
 /**
  * Put your settings here:
