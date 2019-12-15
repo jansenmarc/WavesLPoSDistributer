@@ -18,22 +18,6 @@ var fs = require('fs');
  */
 
 const config = require('./config.json');
-
-/*
-var config = {
-    address: '3P2ek9y4i64aSG9psm2Ge1S5MrgRUouVHoF',
-    alias: 'shockwavesnode',
-    startBlockHeight: 1834254,
-    endBlock: 1838665,
-    firstBlockWithLeases: 1834254,
-    distributableWfnPerBlock: 0,
-    filename: 'payments.json',
-    node: 'http://144.91.84.49',
-    percentageOfFeesToDistribute: 90,
-    blockStorage: 'blocks.json'
-};
-*/
-
 var payments = [];
 var mrt = [];
 var myLeases = {};
