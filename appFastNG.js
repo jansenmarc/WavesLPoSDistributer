@@ -74,6 +74,9 @@ var start = function() {
             previousBlockWavesFees: block.previousBlockWavesFees,
             transactions: transactions
         };
+        if (block.height >= 1740000) {
+            blockInfo.reward = block.reward;
+        }
         fs.appendFileSync(config.blockStorage, JSON.stringify(blockInfo) + '\n');
     });
     console.log('preparing payments...');
@@ -210,7 +213,9 @@ var getAllBlocks = function() {
 var distribute = function(activeLeases, amountTotalLeased, block, previousBlock) {
     var fee;
 
-    if (block.height >= 805000) {
+    if (block.height >= 1740000) {
+        fee = block.wavesFees * 0.4 + block.previousBlockWavesFees * 0.6 + block.reward;
+    } else if (block.height >= 805000) {
         fee = block.wavesFees * 0.4 + block.previousBlockWavesFees * 0.6;
     } else {
         fee = block.wavesFees
