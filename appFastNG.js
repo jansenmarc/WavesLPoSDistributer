@@ -114,7 +114,7 @@ var prepareDataStructure = function(blocks) {
                 if (transaction.fee < 10 * Math.pow(10, 8)) {
                     wavesFees += transaction.fee;
                 }
-            } else if (block.height > 1090000 && transaction.type === 4) {
+            } else if (block.height > 1090000 && (transaction.type === 4 || transaction.type === 16)) {
                 wavesFees += 100000;
             }
         });
