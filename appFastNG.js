@@ -1,4 +1,5 @@
-var request = require('sync-request');
+//var request = require('sync-request');
+var request = require('request');
 var LineReaderSync = require("line-reader-sync")
 
 var fs = require('fs');
@@ -18,14 +19,14 @@ var fs = require('fs');
  */
 
 var config = {
-    address: '',
-    alias: '',
-    startBlockHeight: 462000,
-    endBlock: 465000,
+    address: '3P2HNUd5VUPLMQkJmctTPEeeHumiPN2GkTb',
+    alias: 'WavesGo',
+    startBlockHeight: 3178000,
+    endBlock: 3178907,
     firstBlockWithLeases: 462000,
     distributableMrtPerBlock: 0,
     filename: 'payments.json',
-    node: 'http://127.0.0.1:6869',
+    node: 'http://node.wavesbi.com:6869',
     percentageOfFeesToDistribute: 90,
     blockStorage: 'blocks.json'
 };
@@ -42,9 +43,9 @@ var myForgedBlocks = [];
  * and serializing them into a file that could be used as input for the
  * masspayment tool.
  */
-var start = function() {
+async function start() {
     console.log('getting blocks...');
-    var blocks = getAllBlocks();
+    var blocks = await getAllBlocks();
     if (fs.existsSync(config.blockStorage)) {
         fs.unlinkSync(config.blockStorage);
     }
@@ -129,12 +130,27 @@ var prepareDataStructure = function(blocks) {
     });
 };
 
+async function getBlocks(from, to) {
+    return new Promise(function(resolve, reject){
+        request(config.node + '/blocks/seq/' + from + '/' + to, function (error, response, body) {
+            // in addition to parsing the value, deal with possible errors
+            if (error) return reject(error);
+            try {
+                // JSON.parse() can throw an exception if not valid JSON
+                resolve(JSON.parse(body));
+            } catch(e) {
+                reject(e);
+            }
+        });
+    });
+};
+
 /**
  * Method that returns all relevant blocks.
  *
  * @returns {Array} all relevant blocks
  */
-var getAllBlocks = function() {
+async function getAllBlocks() {
     // leases have been resetted in block 462000, therefore, this is the first relevant block to be considered
     var firstBlockWithLeases = config.firstBlockWithLeases;
     var currentStartBlock = firstBlockWithLeases;
@@ -163,17 +179,14 @@ var getAllBlocks = function() {
 
         if (currentStartBlock + (steps - 1) < config.endBlock) {
             console.log('getting blocks from ' + currentStartBlock + ' to ' + (currentStartBlock + (steps - 1)));
-            var res = request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + (currentStartBlock + (steps - 1)), {
-                'headers': {
-                    'Connection': 'keep-alive'
-                }
-            });
-            if (res.body) {
-                var blocksJSON = res.body.toString();
-                currentBlocks = JSON.parse(blocksJSON);
-            } else {
-                currentBlocks = [];
-            }
+            //var res = request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + (currentStartBlock + (steps - 1)));
+            /*, {
+                //'headers': {
+                //    'Connection': 'keep-alive'
+                //}
+            });*/
+            var blocksJSON = await getBlocks(currentStartBlock, currentStartBlock + (steps - 1));
+            currentBlocks = blocksJSON;
         } else {
             console.log('getting blocks from ' + currentStartBlock + ' to ' + config.endBlock);
             currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + config.endBlock, {
