@@ -19,14 +19,14 @@ var fs = require('fs');
  */
 
 var config = {
-    address: '3P2HNUd5VUPLMQkJmctTPEeeHumiPN2GkTb',
-    alias: 'WavesGo',
-    startBlockHeight: 3178000,
-    endBlock: 3178907,
+    address: '',
+    alias: '',
+    startBlockHeight: 462000,
+    endBlock: 462324,
     firstBlockWithLeases: 462000,
     distributableMrtPerBlock: 0,
     filename: 'payments.json',
-    node: 'http://node.wavesbi.com:6869',
+    node: '',
     percentageOfFeesToDistribute: 90,
     blockStorage: 'blocks.json'
 };
@@ -189,11 +189,12 @@ async function getAllBlocks() {
             currentBlocks = blocksJSON;
         } else {
             console.log('getting blocks from ' + currentStartBlock + ' to ' + config.endBlock);
-            currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + config.endBlock, {
+            currentBlocks = await getBlocks(currentStartBlock, config.endBlock);
+            /*currentBlocks = JSON.parse(request('GET', config.node + '/blocks/seq/' + currentStartBlock + '/' + config.endBlock, {
                 'headers': {
                     'Connection': 'keep-alive'
                 }
-            }).getBody('utf8'));
+            }).getBody('utf8'));*/
         }
         if (currentBlocks.length > 0) {
             currentBlocks.forEach(function(block) {
